@@ -11,10 +11,12 @@ interface WeightChartProps {
 }
 
 export function WeightChart({ weightLogs, targetWeight, currentHeight, onEditLog, onDeleteLog }: WeightChartProps) {
-  // Sort by created_at timestamp
-  const sortedLogs = [...weightLogs].sort((a, b) => 
-    new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-  );
+  // Sort by created_at timestamp in NZ time
+  const sortedLogs = [...weightLogs].sort((a, b) => {
+    const dateA = new Date(a.created_at);
+    const dateB = new Date(b.created_at);
+    return dateB.getTime() - dateA.getTime();
+  });
 
   const currentWeight = sortedLogs[0]?.weight || 0;
   const previousWeight = sortedLogs[1]?.weight || currentWeight;
@@ -39,36 +41,57 @@ export function WeightChart({ weightLogs, targetWeight, currentHeight, onEditLog
   const { category, color } = getBMICategory(bmi);
 
   const formatDateTime = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleString('en-NZ', {
-      timeZone: 'Pacific/Auckland',
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        return 'Invalid date';
+      }
+      return date.toLocaleString('en-NZ', {
+        timeZone: 'Pacific/Auckland',
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Invalid date';
+    }
   };
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-NZ', {
-      timeZone: 'Pacific/Auckland',
-      month: 'numeric',
-      day: 'numeric'
-    });
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        return 'Invalid date';
+      }
+      return date.toLocaleDateString('en-NZ', {
+        timeZone: 'Pacific/Auckland',
+        month: 'numeric',
+        day: 'numeric'
+      });
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Invalid date';
+    }
   };
 
   // Get last 7 days of weight logs
   const last7DaysLogs = (() => {
-    const today = new Date(new Date().toLocaleString('en-US', { timeZone: 'Pacific/Auckland' }));
+    const today = new Date();
     const days: { date: string; weight: number | null }[] = [];
     
     // Create array of last 7 days
     for (let i = 6; i >= 0; i--) {
       const date = new Date(today);
       date.setDate(date.getDate() - i);
-      const dateStr = date.toISOString().split('T')[0];
+      const dateStr = date.toLocaleDateString('en-NZ', {
+        timeZone: 'Pacific/Auckland',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      }).split('/').reverse().join('-');
       
       // Find weight log for this date
       const log = sortedLogs.find(l => l.date === dateStr);
