@@ -13,15 +13,17 @@ import { Settings as SettingsIcon, Scale, Apple } from 'lucide-react';
 
 // Helper function to get current date in YYYY-MM-DD format in NZT
 const getCurrentDate = () => {
-  const now = new Date();
-  return new Date(now.toLocaleString('en-US', { timeZone: 'Pacific/Auckland' }))
-    .toISOString()
-    .split('T')[0];
+  return new Date().toLocaleDateString('en-NZ', {
+    timeZone: 'Pacific/Auckland',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).split('/').reverse().join('-');
 };
 
-// Helper function to convert local time to UTC for database storage
-const toUTCString = (date: Date) => {
-  return date.toISOString();
+// Helper function to get current timestamp in UTC
+const getCurrentUTCTimestamp = () => {
+  return new Date().toISOString();
 };
 
 export default function App() {
@@ -66,7 +68,7 @@ export default function App() {
     const { data, error } = await supabase
       .from('weight_logs')
       .select('*')
-      .order('date', { ascending: false });
+      .order('created_at', { ascending: false });
 
     if (error) {
       console.error('Error loading weight logs:', error);
@@ -86,15 +88,12 @@ export default function App() {
       return;
     }
 
-    // Create a Date object in NZT
-    const nztDate = new Date(new Date().toLocaleString('en-US', { timeZone: 'Pacific/Auckland' }));
-
     const weightData = {
       user_id: user.id,
       weight,
       date: data.date,
       note: data.note || '',
-      created_at: toUTCString(nztDate)
+      created_at: getCurrentUTCTimestamp()
     };
 
     try {
@@ -126,16 +125,13 @@ export default function App() {
   const handleLogMeal = async (data: any) => {
     if (!user) return;
 
-    // Create a Date object in NZT
-    const nztDate = new Date(new Date().toLocaleString('en-US', { timeZone: 'Pacific/Auckland' }));
-
     const mealData = {
       user_id: user.id,
       meal_type: data.mealType,
       description: data.description,
       calories: data.calories ? parseInt(data.calories) : 0,
       date: data.date,
-      created_at: toUTCString(nztDate)
+      created_at: getCurrentUTCTimestamp()
     };
 
     const { error } = await supabase
