@@ -54,7 +54,7 @@ export function WeightChart({ weightLogs, targetWeight, currentHeight, onEditLog
     const date = new Date(dateString);
     return date.toLocaleDateString('en-NZ', {
       timeZone: 'Pacific/Auckland',
-      month: 'short',
+      month: 'numeric',
       day: 'numeric'
     });
   };
@@ -111,7 +111,7 @@ export function WeightChart({ weightLogs, targetWeight, currentHeight, onEditLog
   return (
     <div className="space-y-6">
       {/* Stats Card */}
-      <div className="bg-white p-6 rounded-lg shadow-md">
+      <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md">
         <h2 className="text-xl font-semibold mb-6 flex items-center">
           <LineChart className="w-6 h-6 text-indigo-600 mr-2" />
           Weight & BMI Overview
@@ -160,16 +160,16 @@ export function WeightChart({ weightLogs, targetWeight, currentHeight, onEditLog
           </div>
 
           {/* Weight Chart */}
-          <div className="relative h-40">
+          <div className="relative h-[200px] sm:h-[250px] pb-8">
             {/* Y-axis labels */}
-            <div className="absolute left-0 top-0 bottom-0 w-12 flex flex-col justify-between text-xs text-gray-500">
+            <div className="absolute left-0 top-0 bottom-8 w-12 flex flex-col justify-between text-xs text-gray-500">
               <span>{maxWeight.toFixed(1)}</span>
               <span>{((maxWeight + minWeight) / 2).toFixed(1)}</span>
               <span>{minWeight.toFixed(1)}</span>
             </div>
 
             {/* Chart area */}
-            <div className="absolute left-12 right-0 top-0 bottom-0">
+            <div className="absolute left-12 right-0 top-0 bottom-8">
               <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
                 {/* Grid lines */}
                 <line x1="0" y1="0" x2="100" y2="0" stroke="#e5e7eb" strokeWidth="0.5" />
@@ -203,9 +203,13 @@ export function WeightChart({ weightLogs, targetWeight, currentHeight, onEditLog
               </svg>
 
               {/* X-axis labels */}
-              <div className="flex justify-between mt-2 text-xs text-gray-500">
+              <div className="flex justify-between mt-2">
                 {last7DaysLogs.map((day, i) => (
-                  <div key={i}>{formatDate(day.date)}</div>
+                  <div key={i} className="text-center -ml-2 first:ml-0">
+                    <div className="text-[10px] sm:text-xs text-gray-500 transform -rotate-45 sm:rotate-0 origin-left translate-y-2 sm:translate-y-0 whitespace-nowrap">
+                      {formatDate(day.date)}
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
@@ -214,66 +218,70 @@ export function WeightChart({ weightLogs, targetWeight, currentHeight, onEditLog
       </div>
 
       {/* Weight History */}
-      <div className="bg-white p-6 rounded-lg shadow-md">
+      <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md">
         <h3 className="text-lg font-semibold mb-4">Weight History</h3>
-        <div className="overflow-y-auto max-h-[400px]">
-          <table className="min-w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Date & Time
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Weight
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Note
-                </th>
-                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {sortedLogs.map((log) => (
-                <tr key={log.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
-                    {formatDateTime(log.created_at)}
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
-                    {log.weight} kg
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-500">
-                    {log.note || '-'}
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-right text-sm">
-                    <div className="flex justify-end space-x-2">
-                      {onEditLog && (
-                        <button
-                          onClick={() => onEditLog(log)}
-                          className="p-1 hover:bg-gray-100 rounded"
-                        >
-                          <Edit2 className="w-4 h-4 text-gray-600" />
-                        </button>
-                      )}
-                      {onDeleteLog && (
-                        <button
-                          onClick={() => {
-                            if (window.confirm('Are you sure you want to delete this log?')) {
-                              onDeleteLog(log.id);
-                            }
-                          }}
-                          className="p-1 hover:bg-gray-100 rounded"
-                        >
-                          <Trash2 className="w-4 h-4 text-red-500" />
-                        </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="overflow-x-auto">
+          <div className="inline-block min-w-full align-middle">
+            <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+              <table className="min-w-full divide-y divide-gray-300">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-xs font-medium text-gray-500 sm:pl-6">
+                      Date & Time
+                    </th>
+                    <th scope="col" className="px-3 py-3.5 text-left text-xs font-medium text-gray-500">
+                      Weight
+                    </th>
+                    <th scope="col" className="px-3 py-3.5 text-left text-xs font-medium text-gray-500">
+                      Note
+                    </th>
+                    <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                      <span className="sr-only">Actions</span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 bg-white">
+                  {sortedLogs.map((log) => (
+                    <tr key={log.id} className="hover:bg-gray-50">
+                      <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-900 sm:pl-6">
+                        {formatDateTime(log.created_at)}
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-4 text-sm font-medium">
+                        {log.weight} kg
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                        {log.note || '-'}
+                      </td>
+                      <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                        <div className="flex justify-end space-x-2">
+                          {onEditLog && (
+                            <button
+                              onClick={() => onEditLog(log)}
+                              className="p-1 hover:bg-gray-100 rounded"
+                            >
+                              <Edit2 className="w-4 h-4 text-gray-600" />
+                            </button>
+                          )}
+                          {onDeleteLog && (
+                            <button
+                              onClick={() => {
+                                if (window.confirm('Are you sure you want to delete this log?')) {
+                                  onDeleteLog(log.id);
+                                }
+                              }}
+                              className="p-1 hover:bg-gray-100 rounded"
+                            >
+                              <Trash2 className="w-4 h-4 text-red-500" />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
     </div>
